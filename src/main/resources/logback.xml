@@ -1,0 +1,17 @@
+<configuration>
+
+    <!-- We define all our logging task into the appender like CONSOLE, FILE etc.
+     Here we are logging the ConsoleAppender, as the name indicates, appends on the console.  -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <withJansi>true</withJansi>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>%d{HH:mm:ss.SSS} | %8.8thread | %highlight(%-5level) | %32.32logger{42} | %replace(%msg){'[\s\n\r]+',' '}%n
+            </Pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+</configuration>
