@@ -1,34 +1,27 @@
 package com.ashessin.cs474.project
 
-import caliban.client.Operations.RootQuery
-import caliban.client.SelectionBuilder
-import com.ashessin.cs474.project.graphql.client.Github.{Query, Repository, RepositoryConnection, User}
-import sttp.client._
-import sttp.client.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
-import zio.console.putStrLn
-import zio.{ZIO, _}
+import com.ashessin.cs474.project.builder.{GitHubQueryBuilder, RepositorySearchBuilder}
+import com.typesafe.config.ConfigFactory
 
 object Main extends App {
-  val t = User.repositories(first = Option(10)) {RepositoryConnection.nodes(Repository.nameWithOwner)}
-  val query: SelectionBuilder[RootQuery, Any] = Query.user(login = "samujjwaal") {
-    User.name ~ User.bio ~
-    t
-  }
+
+  val token = ConfigFactory.load().getString("GITHUB_TOKEN")
+
+  // Conventional Builder Pattern
+  val javaRepositoryWithManyFormks = RepositorySearchBuilder()
+    .language("java") // available language list changes frequently, so no checks
+    .forks(1000, ">")
+    .build()
+
+  // Builder pattern with Phantom Types
+  var queryContainer = GitHubQueryBuilder().withSearch(javaRepositoryWithManyFormks)
+    .withLimit(10)
+    .withToken(token)
+    .build()
 
 
-
-  println(s"Query: ${query.toGraphQL().query}")
-
-  override def run(args: List[String]): ZIO[zio.ZEnv, Nothing, Int] = {
-    val uri = uri"https://api.github.com/graphql"
-    val token = System.getenv("GITHUB_TOKEN")
-
-    SttpClient
-      .send(query.toRequest(uri).auth.bearer(token))
-      .map(_.body)
-      .absolve
-      .tap(res => putStrLn(s"Result: $res"))
-      .provideCustomLayer(AsyncHttpClientZioBackend.layer())
-      .foldM(ex => putStrLn(ex.toString).as(1), _ => ZIO.succeed(0))
-  }
+  // pagniate 3 pages
+  println(queryContainer.execute())
+  println(queryContainer.execute())
+  println(queryContainer.execute())
 }
