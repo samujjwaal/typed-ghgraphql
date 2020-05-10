@@ -1,119 +1,328 @@
-# Course Project
-### Description: object-oriented pure functional design and implementation of a [GraphQL](https://graphql.org) client framework for [Github](https://github.com/) as an I/O monad.
-### Grade: 25% with some small bonus - read below.
-#### You can obtain this Git repo using the command git clone git@bitbucket.org:cs474_spring2020/courseproject.git.
+Team Member 1: Samujjwaal Dey (655705084)
+Team Member 2: Ashesh Singh (660389836)
 
-## Preliminaries
-As part of the previous homework assignments you gained experience with creating and managing your Git repositories, you have learned many design patterns, you created your model and the object-oriented design of a design pattern code generator, you learned to create JUnit or Cucumber or FlatSpec tests, you created your SBT or Gradle build scripts, and you completed your first IntelliJ plugin that generated and manipulated the source code of the loaded  Intellij projects. Congratulations!
 
-If you have done your homeworks, you can skip the rest of the prelimininaries. Your instructor created a team for this class named CS474_Spring2020. Please contact your TA, [Mr. Mohammed Siddiq](msiddi56@uic.edu) using your UIC.EDU email account and he will add you to the team repo as developers, since Mr.Siddiq already has the admin privileges. Please use your emails from the class registration roster to add you to the team and you will receive an invitation from BitBucket to join the team. Since it is a large class, please use your UIC email address for communications or Piazza and avoid emails from other accounts like funnybunny1998@gmail.com. If you don't receive a response within 24 hours, please contact us via Piazza, since it may be a case that your direct emails went to the spam folder.
+GraphQL client using GitHub API
+===============================
 
-If you haven't already done so, please create create your account at [BitBucket](https://bitbucket.org/), a Git repo management system. It is imperative that you use your UIC email account that has the extension @uic.edu. Once you create an account with your UIC address, BibBucket will assign you an academic status that allows you to create private repos. Bitbucket users with free accounts cannot create private repos, which are essential for submitting your homeworks and the course project. If you have a problem with obtaining the academic account with your UIC.EDU email address, please contact Atlassian's license and billing team and ask them to enable your academic account by filling out the [Atlassian Bitbucket academic account request form](https://www.atlassian.com/software/views/bitbucket-academic-license).
+This project provides a type safe frontend (rea-only) to build GitHub's [GraphQL](https://graphql.org) queries.
+The project uses Builder pattern with Phantom types. At the backend, the application relies on Caliban to generate the 
+final graphql queries. You can search for Repositories, Users, Issues / Pull Requests with various possible combinations
+and search qualifiers. 
 
-Next, if you haven't done so, you will install [IntelliJ](https://www.jetbrains.com/student/) with your academic license, the JDK, the Scala runtime and the IntelliJ Scala plugin, the [Simple Build Toolkit (SBT)](https://www.scala-sbt.org/1.x/docs/index.html) or the [Gradle build tool](https://gradle.org/) and make sure that you can create, compile, and run Java and Scala programs. Please make sure that you can run [various Java tools from your chosen JDK](https://docs.oracle.com/en/java/javase/index.html).
 
-Just to remind you, in this like all other homeworks and in the course project you will use logging and configuration management frameworks. You will comment your code extensively and supply logging statements at different logging levels (e.g., TRACE, INFO, ERROR) to record information at some salient points in the executions of your programs. All input and configuration variables must be supplied through configuration files -- hardcoding these values in the source code is generally prohibited and will be punished by taking a large percentage of points from your total grade! You are expected to use [Logback](https://logback.qos.ch/) and [SLFL4J](https://www.slf4j.org/) for logging and [Typesafe Conguration Library](https://github.com/lightbend/config) for managing configuration files. These and other libraries should be imported into your project using your script [build.sbt](https://www.scala-sbt.org/1.0/docs/Basic-Def-Examples.html) or [gradle script](https://docs.gradle.org/current/userguide/writing_build_scripts.html). These libraries and frameworks are widely used in the industry, so learning them is the time well spent to improve your resumes.
 
-## WARNING 
-There are a few implementations of the OO functional GraphQL frameworks on the Internet. I know about many of them. You can study these implementations and feel free to use the ideas in your own implementation, and you must acknowledge what you use in your README. However, blindly copying large parts of some existing implementation in your code will result in receiving the grade F for the entire course with the transfer of your case of plagiarism to the Dean of Students Office, which will be followed with severe penalties. Most likely, you will be suspended or complete dismissed from the program in the worst case. Please do not plagiarize existing implementations, it is not worth it! However, if you find some functions of classes that you can reuse in your project, please feel free to do so as long as it does not constitute a major part of your project submission and you acknowledge the reuse in your project documentation.
+1\. About GraphQL and Scala Phantom Types
+-----------------------------------------
 
-## Introduction
-The goal of this project is to gain experience with pure functional object-oriented design of a practically useful and important framework for composing and executing external GraphQL commands from Scala client programs and obtaining and processing the results of these executions. This homework is based on the material from the textbook on Functional Programming in Scala by Paul Chiusano and R�nar Bjarnason and it is modeled on the pure functional design principles described in sections 6 and 7 of the textbook.
+According to [Introduction to GraphQL](https://graphql.org/learn/): 
+> GraphQL is a query language for your API, and a server-side runtime for executing queries by using a type system you 
+> define for your data. GraphQL isn't tied to any specific database or storage engine and is instead backed by your 
+> existing code and data.
 
-In this homework, you will create an object-oriented design and implementation of a program that extracts and organizes git repositories data from [Github](https://github.com/). As the first step, you will create [your developer account at Github](https://developer.github.com/v4/) and you will obtain your authorization key. The [Github schema](https://developer.github.com/v4/public_schema/) is publicly available and you will study it to understand the organization of data items on Github and relationships among them. That is, for a given repo, you may obtain the information on all contributors, commits, URL for each commit, the changeset and many other metadata. For a given contributor, you may determine all projects that this contributor participated in and what type of code s/he committed. A part of this homework is that you come up with your own GraphQL queries that will slice and dice the Github schema and you will create a model and object-oriented design of your program based on your model.
+GraphQL was first introduced by Facebook after years of using it within the organization. Since then many other 
+organizations have migrated. GitHub is one such company which started using GraphQL in 2016 as detailed in this 
+[blog post](https://github.blog/2016-09-14-the-github-graphql-api/). GitHub's GraphQL SDL is publicly available at their
+developer's documentation [page](https://developer.github.com/v4/public_schema/). The Schema defines several types and 
+is complex. Tools such as [GraphQL Voyager](https://apis.guru/graphql-voyager/) can be used to visualize the schema. 
+Further, Github also provides an explorer [page](https://developer.github.com/v4/explorer/) which runs the 
+[GraphQL IDE (GraphQLI)](https://github.com/graphql/graphiql).
 
-This homework is based on GraphQL and it is a relatively new technology released by Facebook as an open-source software and it is already widely used. There are many resources on the Internet including its [official specification](https://graphql.github.io/graphql-spec/June2018/), [query tools](https://graphcms.com/blog/top-10-graphql-tools-for-2019/), and a [compendium of useful links](https://github.com/chentsulin/awesome-graphql#lib-java) in addition to youtube videos and various documents and examples on [Stackoverflow](https://stackoverflow.com/search?q=graphql). It is beneficial that you learn GraphQL as you go, since it is a simple declarative language that can be nicely intergrated into programs written in object-oriented languages.
+Although GraphQL queries are easy to write, the are not always checked, specially in weakly types languages like 
+JavaScript. Moreover, it's easy to make mistakes which will result in failure when the program is under execution.
+One way to rectify this is to build GraphQL queries iteratively using builder pattern which also does some validations
+before executing the query. This way, incorrect/malformed GraphQL queries are never build, and an error is issues during
+compile time. One interesting way to implement Builder patter is by using Phantom types (Scala notation). Phantom types
+never get instantiated and are only a way to prevent incorrect code from compiling. They do this by enforcing implicit 
+type constraints.
 
-This course project script is written using a retroscripting technique, in which the project outlines are generally and loosely drawn, and the individual students improvise to create the implementation that fits their refined objectives. In doing so, students are expected to stay within the basic requirements of the project and they are free to experiments. That is, it is impossible that two non-collaborating groups will submit similar project implementations! Asking questions is important, so please ask away at Piazza!
 
-## Functionality
-Once you installed and configured your Github developer account, your job is to create various GraphQL queries to understand how the process works. Consider a snippet of the Scala code below that creates a basic HTTP client for Github GraphQL endpoint and serves a basic query and obtains the response. In it, a simple GraphQL query for Github is formed, a connection to the Github endpoint is created, the query is submitted and the response is obtained. Using JSON converters the response is converted into Scala classes. Of course, feel free to experiment and use third-party libraries for your client, but remember that your time is limited and you may not be able to explore the majority of the available tools on the Internet for GraphQL.
+
+1\. Using Caliban Client (`caliban-codegen-sbt`)
+------------------------------------------------
+Even with a builder pattern in place, it is quite difficult to write partial raw GraphQL Queries as different functions 
+are called on the respective builder class instance. Caliban-client solves this problem since it can auto generate
+boilerplate code from a GraphQL schema. This way makes it possible to write GraphQL queries using Scala code in a 
+type-safe and functional fashion.
+
+Steps to genrate the boilerplate code using GitHub's public GraphQl DSL:
+1. Add `caliban-codegen-sbt` plugin to your sbt project and enable it
+2. Get the GraphQL SDL file
+3 Run `calibanGenClient schemaPath outPath ?scalafmtPath`
+    
+For additional details see: 
+[https://ghostdogpr.github.io/caliban/docs/client.html#dependencies](https://ghostdogpr.github.io/caliban/docs/client.html#dependencies)
+
+The above steps were followed to generate `com.ashessin.cs474.project.graphql.client.Github` using 
+`src/main/resources/github/schema.public.graphql` schema definition file.
+
+
+
+2\. Using Builder Pattern with Phantom Types
+--------------------------------------------
+
+As explained earlier, for additional type safety Builder patterns with Phantom types have been used. This way it's easy 
+to control the creation of a builder's target class and this ensures that the creation happens in a well ordered way.
+
+The project uses approach similar to Chapter 6 (Adding generalized type constraints to the required methods) of 
+[Scala Design Patterns Book](https://learning.oreilly.com/library/view/scala-design-patterns/9781785882500/) to implement
+this technique.
+
+Example: The `com.ashessin.cs474.project.builder.GitHubQueryBuilder` class must have certain mandatory fields to be 
+valid. Instead of putting this in a constructor (and thus making them mandatory for instanciation), we do implicit 
+type constraint checks on each call to the builder's method untill reaches a "Pass State".
+
+```
+sealed trait QueryBuilderStep
+
+sealed trait HasSearch extends QueryBuilderStep
+
+sealed trait HasLimit extends QueryBuilderStep
+
+sealed trait HasToken extends QueryBuilderStep
+
+/**
+ * Builder class using Phantom Types for instantiating [[com.ashessin.cs474.project.builder.GitHubQuery]].
+ *
+ * @param ghSearch instance of [[com.ashessin.cs474.project.model.GHSearch]] derived type
+ * @param limit    number of results to fetch on each call to
+ *                 [[com.ashessin.cs474.project.builder.GitHubQuery#execute()]]
+ * @param token    the user's unique GitHub OAuth token
+ * @param uri      uri to GitHub's GraphQl endpoint
+ * @tparam PassedStep via HasSearch, HasLimit, HasToken
+ */
+class GitHubQueryBuilder[PassedStep <: QueryBuilderStep] private(
+  var ghSearch: GHSearch,
+  var limit: Int,
+  var token: String,
+  var uri: String
+) {
+
+/*************/
+
+    def withSearch(search: GHSearch): GitHubQueryBuilder[HasSearch] = {
+        this.ghSearch = search
+        new GitHubQueryBuilder[HasSearch](this)
+     }
+
+    def withLimit(limit: Int)(implicit ev: PassedStep =:= HasSearch): GitHubQueryBuilder[HasLimit] = {
+        /*************/
+        new GitHubQueryBuilder[HasLimit](this)
+     }
+
+    def withToken(token: String)(implicit ev: PassedStep =:= HasLimit): GitHubQueryBuilder[HasToken] = {
+        /*************/
+        new GitHubQueryBuilder[HasToken](this)
+    }
+
+    def build()(implicit ev: PassedStep =:= HasToken): GitHubQuery = new GitHubQuery(
+        ghSearch, limit, token, uri
+    )
+}
+```
+
+In the above builder, the user must specify `ghSearch`, `limit`, `token` for the instance to reach the `PassedStep`
+implicit type. Until then, the compiler will issue an error.
+
+
+
+2\. Some Important Files
+------------------------
+
+    src/main/scala/com/ashessin/cs474/project/model
+        GHSearch.scala                  Base class for all github search classes, instantiate using respective builder 
+                                        patterns.
+        GHSearchBuilder.scala           Base class for all github search builders.
+    
+    src/main/scala/com/ashessin/cs474/project/builder   
+        GitHubQuery.scala               The root query class for using Github's GraphQL API with typechecking.
+        GHRepositorySearch.scala        Github Repository search query class.
+        GHUserSearch.scala              Github User search query class.
+        GHIssuePrSearch.scala           Github Issue/PR search query class.
+        
+    src/main/scala/com/ashessin/cs474/project/graphql/client/
+        Github.scala                    The boilerplate code for GitHub's GraphQL
+
+    src/main/resources/application.conf File for specifying the GitHub OAuth Token
+
+
+
+4\. Application Design & Sample Usage
+-------------------------------------
+
+As detailed in the above sections, the program uses typesafe Builder pattern to generate QraphQL queries with focus on 
+search related queries. Pagination support is built-in and results can be iterated over by repeated calls to 
+`com.ashessin.cs474.project.builder.GitHubQuery.execute` method. Depending on the needs, the queries can be as simple as
+just searching by a keyword but also complex. For example, the repository search class provides 21 methods for 
+instancating the Repository search class and several of these have additional range/arathamic operators. Some sample 
+GraphQL requests and their responses:
+
+Searching Repositories (Scala builder):
 ```scala
-val BASE_GHQL_URL = "https://api.github.com/graphql"
-val temp="{viewer {email login url}}"
-implicit val formats = DefaultFormats
+    GitHubQueryBuilder()
+      .withSearch(RepositorySearchBuilder("spark-stocksim")
+        .repo("user501254", "spark-stocksim")
+        .topic("spark-sql")
+        .topics(2, ">")
+        .build())
+      .withLimit(1)
+      .withToken(token)
+      .build()
+```
 
-val client = HttpClientBuilder.create.build
-val httpUriRequest = new HttpPost(BASE_GHQL_URL)
-httpUriRequest.addHeader("Authorization", "Bearer d6150dbc62ccafe310080e1b37babe13f46dbbbc")
-httpUriRequest.addHeader("Accept", "application/json")
-val gqlReq = new StringEntity("{\"query\":\"" + temp + "\"}" )
-httpUriRequest.setEntity(gqlReq)
-
-val response = client.execute(httpUriRequest)
-System.out.println("Response:" + response)
-response.getEntity match {
-    case null => System.out.println("Response entity is null")
-    case x if x != null => {
-      val respJson = fromInputStream(x.getContent).getLines.mkString
-      System.out.println(respJson)
-      val viewer = parse(respJson).extract[Data]
-      System.out.println(viewer)
-      System.out.println(write(viewer))
+Generated GraphQL (with default selection of repository fields):
+```js
+{
+  search(first: 1, query: "spark-stocksim topic:spark-sql repo:user501254/spark-stocksim topics:>2", type: REPOSITORY) {
+    pageInfo {
+      endCursor
+    }
+    nodes {
+      __typename
+      ... on App {
+        id
+      }
+      ... on MarketplaceListing {
+        id
+      }
+      ... on Issue {
+        id
+      }
+      ... on Organization {
+        id
+      }
+      ... on PullRequest {
+        id
+      }
+      ... on Repository {
+        id
+        nameWithOwner
+        createdAt
+        description
+        homepageUrl
+        forkCount
+        isArchived
+        isFork
+        isPrivate
+        stargazers {
+          totalCount
+        }
+        languages(first: 3) {
+          nodes {
+            name
+          }
+        }
+      }
+      ... on User {
+        id
+      }
+    }
   }
 }
 ```
 
-In your course project you will create an extensible framework with typed GraphQL commands that the clients will execute using such monadic combinators as **flatMap**, **Option**, and **Future** among the others. Each GraphQL external command type will be implemented using the pattern [Builder](https://en.wikipedia.org/wiki/Builder_pattern). Additional 1% bonus will be given if you implement this pattern using [phantom types](https://medium.com/@maximilianofelice/builder-pattern-in-scala-with-phantom-types-3e29a167e863). Here is a general outline for the code that a programmer will write to execute external commands using your framework.
+Searching Users:
+
 ```scala
-val gitHubObject:Option[GHQLRespone] = (new Github).Builder().setAuthorization(BEARER,GetAuthCodeFromConfig()).setHeader(ACCEPT, APPJSON).build()
-val result = gitHubObject.flatMap((new QueryCommand()).setRepo(ALLREPOS).setLanguages(List(JAVA, SCALA)).setCommits(_>200).build()).filter((new Stars(_>10))).filter(Contributors(_>10)).flatMap(PullCommits(Last(10)))
+    GitHubQueryBuilder()
+      .withSearch(RepositorySearchBuilder()
+        .user("user501254")
+        .topics(1, ">")
+        .build())
+      .withLimit(1)
+      .withToken(token)
+      .build()
 ```
-You see how clean the code is and we use the Scala compiler to type check it to ensure that mistakes are not made unlike typing string literals in the code where we can easily make a typo mistake and the program will crash or return an exception or incorrect results. Also, this code is clean and compact, it is easy to read, it is not cluttered with extemporaneously introduced variables like gqlReq. All error and exception handling is buried inside your framework. Your client programmers know your commands and how to compose them. Low level API calls that deal with network data transfer and data constructions and parsing are buried in your framework.
 
-As you can see, your work can be broken down in the following three phases. In the first phase, you will select what subset of GraphQL commands you choose to support and how you will design the type system to hide the complexity of constructing these commands with proper command line parameters and the external use values (e.g., an authentication token). Keep in mind that your design must provide sufficient information hiding and allow programmers to extend it at the same time (i.e., you may consider the use of sealed traits). Executing each command results in data, so you will design data parsers for specific commands in which you will embed the information of how the resulting data is structured. For example, the execution of the command query may result in the following response.
+```js
+{
+  search(first: 15, query: "followers:>100000", type: USER) {
+    pageInfo {
+      endCursor
+    }
+    nodes {
+      __typename
+      ... on App {
+        id
+      }
+      ... on MarketplaceListing {
+        id
+      }
+      ... on Issue {
+        id
+      }
+      ... on Organization {
+        id
+      }
+      ... on PullRequest {
+        id
+      }
+      ... on Repository {
+        id
+      }
+      ... on User {
+        id
+        login
+        name
+        bio
+        company
+        email
+        location
+        websiteUrl
+        followers {
+          totalCount
+        }
+      }
+    }
+  }
+}
 ```
-{                                               
-  "data": {                                     
-    "googleRepo": {                             
-      "name": "WebFundamentals",                
-      "owner": {                                
-        "id": "MDEyOk9yZ2FuaXphdGlvbjEzNDIwMDQ="
-      }                                         
-    },                                          
-    "facebookRepo": {                           
-      "name": "react",                          
-      "owner": {                                
-        "id": "MDEyOk9yZ2FuaXphdGlvbjY5NjMx"    
-      }                                         
-    }                                           
-  }                                             
-}                                               
+
+Searching repositories by language and paginating results
 ```
-It would be unreasonable to expose the user of your framework to this table data. You will provide combinators like `filter(_.equalTo(RepoName()) && _.equalTo(OwnerId()))` that will return the projection of the table, specifically the results of the name of the repo and the owner id. Thus, the knowledge of the resulting data structure/format will be encapsulated in the command that you design and implement.
+  val javaRepositoryWithManyFormks = RepositorySearchBuilder()
+      .language("java") // available language list changes frequently, so no checks
+      .forks(1000, ">")
+      .build()
+  
+    // Builder pattern with Phantom Types
+    var queryContainer = GitHubQueryBuilder().withSearch(javaRepositoryWithManyFormks)
+      .withLimit(10)
+      .withToken(token)
+      .build()
+  
+  
+    // pagniate 3 pages
+    println(queryContainer.execute())
+    println(queryContainer.execute())
+    println(queryContainer.execute())
+```
 
-In the second phase, you will create your underlying implementation of the actual GraphQL command executor and data retriever that will be buried in your framework, i.e., the user of your framework will not be exposed to the complexities of the actual interactions with GraphQL commands and raw JSON response data. Finally, in the third phase of the course project, you will test your framework and you will create examples and documentation for your users that will be included in your submission along with the design document that describes a model of your GraphQL command execution, its constraints and rules, your design of the classes, traits, and monadic combinators. Of course, your document should start with example program(s) that you write that use your framework, which also serve as the test cases that verify its behavior.
+```text
+{"query":"query{search(first:10,query:\"forks:>1000 language:java\",type:REPOSITORY){pageInfo{endCursor} nodes{__typename ... on App{id} ... on MarketplaceListing{id} ... on Issue{id} ... on Organization{id} ... on PullRequest{id} ... on Repository{id nameWithOwner createdAt description homepageUrl forkCount isArchived isFork isPrivate stargazers{totalCount} languages(first:3){nodes{name}}} ... on User{id}}}}","variables":{}}
+```
 
-## Baseline Submission
-Your baseline project submission should include your application design with a conceptual explanation in the document or in the comments in the source code of the architecture and design choices that you made, and the documentation that describe the build, deployment and the runtime, to be considered for grading. Your project submission should include all your source code as well as non-code artifacts (e.g., resource files if applicable), your project should be buildable using SBT. Simply copying some instrumentation examples from open-source projects and modifying them a bit will result in desk-rejecting your submission.
+```text
+{"data":{"search":{"pageInfo":{"endCursor":"Y3Vyc29yOjEw"},"nodes":[{"__typename":"Repository","id":"MDEwOlJlcG9zaXRvcnkxMjEzOTU1MTA=","nameWithOwner":"CyC2018/CS-Notes","createdAt":"2018-02-13T14:56:24Z","description":":books: 技术面试必备基础知识、Leetcode、计算机操作系统、计算机网络、系统设计、Java、Python、C++","homepageUrl":"https://cyc2018.github.io/CS-Notes","forkCount":32677,"isArchived":false,"isFork":false,"isPrivate":false,"stargazers":{"totalCount":100432},"languages":{"nodes":[{"name":"Java"}]}},{"__typename":"Repository","id":"MDEwOlJlcG9zaXRvcnkxMzI0NjQzOTU=","nameWithOwner":"Snailclimb/JavaGuide","createdAt":"2018-05-07T13:27:00Z","description":"【Java学习+面试指南】 一份涵盖大部分Java程序员所需要掌握的核心知识。","homepageUrl":"https://gitee.com/SnailClimb/JavaGuide","forkCount":26863,"isArchived":false,"isFork":false,"isPrivate":false,"stargazers":{"totalCount":78123},"languages":{"nodes":[{"name":"Java"}]}},{"__typename":"Repository","id":"MDEwOlJlcG9zaXRvcnkyMjc5MDQ4OA==","nameWithOwner":"iluwatar/java-design-patterns","createdAt":"2014-08-09T16:45:18Z","description":"Design patterns implemented in Java","homepageUrl":"https://java-design-patterns.com","forkCount":18495,"isArchived":false,"isFork":false,"isPrivate":false,"stargazers":{"totalCount":57598},"languages":{"nodes":[{"name":"Java"},{"name":"HTML"},{"name":"CSS"}]}},{"__typename":"Repository","id":"MDEwOlJlcG9zaXRvcnkxNjA2NDAwOTQ=","nameWithOwner":"MisterBooo/LeetCodeAnimation","createdAt":"2018-12-06T08:01:22Z","description":"Demonstrate all the questions on LeetCode in the form of animation.（用动画的形式呈现解LeetCode题目的思路）","homepageUrl":"","forkCount":9848,"isArchived":false,"isFork":false,"isPrivate":false,"stargazers":{"totalCount":53708},"languages":{"nodes":[{"name":"Java"},{"name":"Python"},{"name":"C++"}]}},{"__typename":"Repository","id":"MDEwOlJlcG9zaXRvcnk1MDc3NzU=","nameWithOwner":"elastic/elasticsearch","createdAt":"2010-02-08T13:20:56Z","description":"Open Source, Distributed, RESTful Search Engine","homepageUrl":"https://www.elastic.co/products/elasticsearch","forkCount":16646,"isArchived":false,"isFork":false,"isPrivate":false,"stargazers":{"totalCount":48730},"languages":{"nodes":[{"name":"Shell"},{"name":"Python"},{"name":"Perl"}]}},{"__typename":"Repository","id":"MDEwOlJlcG9zaXRvcnk2Mjk2Nzkw","nameWithOwner":"spring-projects/spring-boot","createdAt":"2012-10-19T15:02:57Z","description":"Spring Boot","homepageUrl":"https://spring.io/projects/spring-boot","forkCount":29828,"isArchived":false,"isFork":false,"isPrivate":false,"stargazers":{"totalCount":47543},"languages":{"nodes":[{"name":"Java"},{"name":"Smarty"},{"name":"HTML"}]}},{"__typename":"Repository","id":"MDEwOlJlcG9zaXRvcnk4MTk3NTM3Mg==","nameWithOwner":"kdn251/interviews","createdAt":"2017-02-14T18:19:25Z","description":"Everything you need to know to get the job.","homepageUrl":"https://www.youtube.com/channel/UCKvwPt6BifPP54yzH99ff1g?view_as=subscriber","forkCount":9271,"isArchived":false,"isFork":false,"isPrivate":false,"stargazers":{"totalCount":43824},"languages":{"nodes":[{"name":"Java"}]}},{"__typename":"Repository","id":"MDEwOlJlcG9zaXRvcnkxNTE4MzQwNjI=","nameWithOwner":"doocs/advanced-java","createdAt":"2018-10-06T11:38:30Z","description":"😮 互联网 Java 工程师进阶知识完全扫盲：涵盖高并发、分布式、高可用、微服务、海量数据处理等领域知识，后端同学必看，前端同学也可学习","homepageUrl":"https://doocs.github.io/advanced-java","forkCount":12046,"isArchived":false,"isFork":false,"isPrivate":false,"stargazers":{"totalCount":43275},"languages":{"nodes":[{"name":"Java"}]}},{"__typename":"Repository","id":"MDEwOlJlcG9zaXRvcnk3NTA4NDEx","nameWithOwner":"ReactiveX/RxJava","createdAt":"2013-01-08T20:11:48Z","description":"RxJava – Reactive Extensions for the JVM – a library for composing asynchronous and event-based programs using observable sequences for the Java VM.","homepageUrl":"","forkCount":7130,"isArchived":false,"isFork":false,"isPrivate":false,"stargazers":{"totalCount":42594},"languages":{"nodes":[{"name":"Shell"},{"name":"Java"},{"name":"CSS"}]}},{"__typename":"Repository","id":"MDEwOlJlcG9zaXRvcnkyMDMwMDE3Nw==","nameWithOwner":"google/guava","createdAt":"2014-05-29T16:23:17Z","description":"Google core libraries for Java","homepageUrl":"","forkCount":8340,"isArchived":false,"isFork":false,"isPrivate":false,"stargazers":{"totalCount":37162},"languages":{"nodes":[{"name":"Java"},{"name":"CSS"},{"name":"Shell"}]}}]}}}
+```
 
-## Piazza collaboration
-You can post questions and replies, statements, comments, discussion, etc. on Piazza. For this homework, feel free to share your ideas, mistakes, code fragments, commands from scripts, and some of your technical solutions with the rest of the class, and you can ask and advise others using Piazza on where resources and sample programs can be found on the internet, how to resolve dependencies and configuration issues. When posting question and answers on Piazza, please select the appropriate folder, i.e., courseproject to ensure that all discussion threads can be easily located. Active participants and problem solvers will receive bonuses from the big brother :-) who is watching your exchanges on Piazza (i.e., your class instructor). However, *you must not post your dockerfile or your source code!*
+```text
+{"query":"query{search(after:\"Y3Vyc29yOjEw\",first:10,query:\"forks:>1000 language:java\",type:REPOSITORY){pageInfo{endCursor} nodes{__typename ... on App{id} ... on MarketplaceListing{id} ... on Issue{id} ... on Organization{id} ... on PullRequest{id} ... on Repository{id nameWithOwner createdAt description homepageUrl forkCount isArchived isFork isPrivate stargazers{totalCount} languages(first:3){nodes{name}}} ... on User{id}}}}","variables":{}}
+```
 
-## Git logistics
-**This is a group project,** with at least one and at most five members allowed in a group. Each student can participate in at most one group; enrolling in more than one group will result in the grade zero. Each group will select a group leader who will create a private fork and will invite the other group classmates with the write access to that fork repo. Each submission will include the names of all groupmates in the README.md and all groupmates will receive the same grade for this course project submission. Group leaders with successful submissions and good quality work will receive an additional 2% bonus for their management skills - it applied only to groups with two or more members. Please read the syllabus for the advice on how to select your team members.
+```text
+{"data":{"search":{"pageInfo":{"endCursor":"Y3Vyc29yOjIw"},"nodes":[{"__typename":"Repository","id":"MDEwOlJlcG9zaXRvcnk1MTUyMjg1","nameWithOwner":"square/okhttp","createdAt":"2012-07-23T13:42:55Z","description":"Square’s meticulous HTTP client for Java and Kotlin.","homepageUrl":"https://square.github.io/okhttp/","forkCount":8020,"isArchived":false,"isFork":false,"isPrivate":false,"stargazers":{"totalCount":36961},"languages":{"nodes":[{"name":"Shell"},{"name":"Java"},{"name":"Kotlin"}]}},{"__typename":"Repository","id":"MDEwOlJlcG9zaXRvcnkxMTQ4NzUz","nameWithOwner":"spring-projects/spring-framework","createdAt":"2010-12-08T04:04:45Z","description":"Spring Framework","homepageUrl":"https://spring.io/projects/spring-framework","forkCount":24793,"isArchived":false,"isFork":false,"isPrivate":false,"stargazers":{"totalCount":36862},"languages":{"nodes":[{"name":"Groovy"},{"name":"Java"},{"name":"HTML"}]}},{"__typename":"Repository","id":"MDEwOlJlcG9zaXRvcnk4OTIyNzU=","nameWithOwner":"square/retrofit","createdAt":"2010-09-06T21:39:43Z","description":"Type-safe HTTP client for Android and Java by Square, Inc.","homepageUrl":"https://square.github.io/retrofit/","forkCount":6518,"isArchived":false,"isFork":false,"isPrivate":false,"stargazers":{"totalCount":35549},"languages":{"nodes":[{"name":"Shell"},{"name":"Java"},{"name":"CSS"}]}},{"__typename":"Repository","id":"MDEwOlJlcG9zaXRvcnkxMjc5ODgwMTE=","nameWithOwner":"macrozheng/mall","createdAt":"2018-04-04T01:11:44Z","description":"mall项目是一套电商系统，包括前台商城系统及后台管理系统，基于SpringBoot+MyBatis实现，采用Docker容器化部署。 前台商城系统包含首页门户、商品推荐、商品搜索、商品展示、购物车、订单流程、会员中心、客户服务、帮助中心等模块。 后台管理系统包含商品管理、订单管理、会员管理、促销管理、运营管理、内容管理、统计报表、财务管理、权限管理、设置等模块。","homepageUrl":"http://www.macrozheng.com/admin/","forkCount":14539,"isArchived":false,"isFork":false,"isPrivate":false,"stargazers":{"totalCount":34174},"languages":{"nodes":[{"name":"Java"},{"name":"TSQL"},{"name":"Shell"}]}},{"__typename":"Repository","id":"MDEwOlJlcG9zaXRvcnk0NzEwOTIw","nameWithOwner":"apache/dubbo","createdAt":"2012-06-19T07:56:02Z","description":"Apache Dubbo is a high-performance, java based, open source RPC framework.","homepageUrl":"http://dubbo.apache.org","forkCount":21000,"isArchived":false,"isFork":false,"isPrivate":false,"stargazers":{"totalCount":32196},"languages":{"nodes":[{"name":"Java"},{"name":"Shell"},{"name":"Thrift"}]}},{"__typename":"Repository","id":"MDEwOlJlcG9zaXRvcnkxOTE0ODk0OQ==","nameWithOwner":"PhilJay/MPAndroidChart","createdAt":"2014-04-25T14:29:47Z","description":"A powerful 🚀 Android chart view / graph view library, supporting line- bar- pie- radar- bubble- and candlestick charts as well as scaling, dragging and animations.","homepageUrl":"","forkCount":7863,"isArchived":false,"isFork":false,"isPrivate":false,"stargazers":{"totalCount":30606},"languages":{"nodes":[{"name":"Java"}]}},{"__typename":"Repository","id":"MDEwOlJlcG9zaXRvcnkxMTI2NzUwOQ==","nameWithOwner":"bumptech/glide","createdAt":"2013-07-08T22:52:33Z","description":"An image loading and caching library for Android focused on smooth scrolling","homepageUrl":"https://bumptech.github.io/glide/","forkCount":5313,"isArchived":false,"isFork":false,"isPrivate":false,"stargazers":{"totalCount":28972},"languages":{"nodes":[{"name":"Java"},{"name":"Shell"}]}},{"__typename":"Repository","id":"MDEwOlJlcG9zaXRvcnk3MDE5ODg3NQ==","nameWithOwner":"airbnb/lottie-android","createdAt":"2016-10-06T22:42:42Z","description":"Render After Effects animations natively on Android and iOS, Web, and React Native","homepageUrl":"http://airbnb.io/lottie/","forkCount":4595,"isArchived":false,"isFork":false,"isPrivate":false,"stargazers":{"totalCount":28724},"languages":{"nodes":[{"name":"Java"},{"name":"Kotlin"},{"name":"Shell"}]}},{"__typename":"Repository","id":"MDEwOlJlcG9zaXRvcnk2NDU1ODE0Mw==","nameWithOwner":"Blankj/AndroidUtilCode","createdAt":"2016-07-30T18:18:32Z","description":":fire: Android developers should collect the following utils(updating).","homepageUrl":"https://blankj.com/2016/07/31/android-utils-code/","forkCount":8901,"isArchived":false,"isFork":false,"isPrivate":false,"stargazers":{"totalCount":26938},"languages":{"nodes":[{"name":"Java"},{"name":"Groovy"},{"name":"Kotlin"}]}},{"__typename":"Repository","id":"MDEwOlJlcG9zaXRvcnkxMDgyNTI4OTI=","nameWithOwner":"proxyee-down-org/proxyee-down","createdAt":"2017-10-25T10:07:27Z","description":"http下载工具，基于http代理，支持多连接分块下载","homepageUrl":null,"forkCount":4685,"isArchived":false,"isFork":false,"isPrivate":false,"stargazers":{"totalCount":25615},"languages":{"nodes":[{"name":"Java"},{"name":"JavaScript"},{"name":"HTML"}]}}]}}}
+```
 
-If you submitted your previous homework(s), it means that you were already added as a member of CS474_Spring2020 team in Bitbucket and you will see the course project repo. You will fork this repository and your fork will be private, no one else besides you, your forkmates, the TA and your course instructor will have access to your fork. Please remember to grant a read (or write) access to your repository to your TA and your instructor and write access to your forkmates. You can commit and push your code as many times as you want. Your code will not be visible and it should not be visible to other students except for your forkmates, of course. When you push your project, your instructor and the TA will see you code in your separate private fork. Making your fork public or inviting other students except for your forkmates to join your fork before the submission deadline will result in losing your grade. For grading, only the latest push timed before the deadline will be considered. **If you push after the deadline, your grade for the homework will be zero**. For more information about using the Git and Bitbucket specifically, please use this [link as the starting point](https://confluence.atlassian.com/bitbucket/bitbucket-cloud-documentation-home-221448814.html). For those of you who struggle with the Git, I recommend a book by Ryan Hodson on Ry's Git Tutorial. The other book called Pro Git is written by Scott Chacon and Ben Straub and published by Apress and it is [freely available](https://git-scm.com/book/en/v2/). There are multiple videos on youtube that go into details of the Git organization and use.
+5\. Setup Instructions
+----------------------
 
-Please follow this naming convention while submitting your work : "Firstname_Lastname_project" without quotes, where the group leader will specify her/his first and last names **exactly as the group leader is registered with the University system**, so that we can easily recognize your submission. I repeat, make sure that you will give both your TA and the course instructor the read access to your *private forked repository*.
+1. Clone this repository using `git clone https://asing80@bitbucket.org/asing80/cs474-project.git` command.
 
-## Discussions and submission
-You can post questions and replies, statements, comments, discussion, etc. on Piazza. Remember that you cannot share your code and your solutions privately, but you can ask and advise others using Piazza and StackOverflow or some other developer networks where resources and sample programs can be found on the Internet, how to resolve dependencies and configuration issues. Yet, your implementation should be your own and you cannot share it. Alternatively, you cannot copy and paste someone else's implementation and put your name on it. Your submissions will be checked for plagiarism. **Copying code from your classmates or from some sites on the Internet will result in severe academic penalties up to the termination of your enrollment in the University**. When posting question and answers on Piazza, please select the appropriate folder, i.e., **course project** to ensure that all discussion threads can be easily located.
+2. Import as sbt project in IntelliJ.
 
+3. Obtain GitHub OAuth token key.
 
-## Submission deadline and logistics
-Wednesday, May 6, 2020 at 9:00PM via the bitbucket repository. Your submission will include the source code, your documentation with instructions and detailed explanations on how to assemble and deploy your program both in IntelliJ and CLI SBT, and a document that explains how you built and deployed your program and what your experiences are with instrumenting open-source Java programs, and the limitations of your implementation. Again, do not forget, please make sure that you will give both your TA and your instructor the read access to your private forked repository. Your name should be shown in your README.md file and other documents. Your code should compile and run from the command line using the commands like ```sbt clean compile test``` and from the docker image. Naturally, you project should be IntelliJ friendly, i.e., your graders should be able to import your code into IntelliJ and run from there. Use .gitignore to exlude files that should not be pushed into the repo.
+4. Edit `src/main/resources/application.conf` to set the required key.
 
-## Evaluation criteria
-- the maximum grade for this course project is 25% with the bonus up to 1% for being the group leader for a group with more than two members. Points are subtracted from this maximum grade: for example, saying that 2% is lost if some requirement is not completed means that the resulting grade will be 25%-2% => 23%; if the core functionality does not work, no bonus points will be given;
-- the code does not work in that it does not produce a correct output or crashes: up to 25% lost;
-- insufficient comments in your code: up to 15% lost;
-- insufficient tests in your codebase: up to 15% lost;
-- not having tests that test the functionality of your command implementations: up to 25% lost;
-- missing essential comments and explanations from the source code that you wrote: up to 20% lost;
-- your Scala code is simply a version of imperative Java code with many mutable variables exposed to your clients: up to 15% lost;
-- your code does not have sufficient comments or your accompanying documents do not contain a description of how you designed and implemented the instrumenter: up to 20% lost;
-- the documentation exists but it is insufficient to understand : up to 20% lost;
-- the minimum grade for this course project cannot be less than zero.
-
-That's it, folks!
+5. Run The `Main` class file.
