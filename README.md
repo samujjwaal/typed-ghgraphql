@@ -1,3 +1,7 @@
+Team Member 1: Samujjwaal Dey (655705084)
+Team Member 2: Ashesh Singh (660389836)
+
+
 GraphQL client using GitHub API
 ===============================
 
