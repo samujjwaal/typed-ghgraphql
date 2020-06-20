@@ -1,5 +1,5 @@
-GraphQL client using GitHub API
-===============================
+Typed GHGraphQL — Typesafe Github GraphQL Frontend
+==================================================
 
 This project provides a type safe read-only frontend to build GitHub's [GraphQL](https://graphql.org) queries.
 The project uses Builder pattern with Phantom types. Internally, the application relies on Caliban to generate the 
