@@ -237,3 +237,5 @@ project/plugins/project/
 *.metals
 
 # End of https://www.gitignore.io/api/sbt,java,scala,intellij,intellij+all,intellij+iml
+
+application.conf
